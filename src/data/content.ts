@@ -25,6 +25,7 @@ export const LUKKA_CHUPPI_DATA = {
 };
 
 export const WELCOME_DATA = {
+  dateTag: "✨ 13th September ✨",
   heading: "Happy Birthday, Tuhi ❤️",
   subtitle: "Meri jaan, meri rani…",
   paragraph: "Main tumhare liye sirf 'Happy Birthday' likh ke ruk sakta tha… but honestly, tum mere liye itni ordinary ho hi nahi. So I made you a tiny little world."
@@ -138,6 +139,7 @@ export const CANDLE_DATA = {
 export const FINALE_DATA = {
   lines: [
     "Happy Birthday, Tuhi ❤️",
+    "✨ 13th September ✨",
     "Meri jaan.",
     "Meri rani.",
     "My favourite person.",

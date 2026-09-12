@@ -48,6 +48,9 @@ export const WelcomeSection: React.FC = () => {
           onClick={handleCelebrate}
           className="party-border rounded-3xl p-6 md:p-10 cursor-pointer group birthday-glow"
         >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs md:text-sm font-semibold tracking-widest uppercase mb-3">
+            <span>📅 {WELCOME_DATA.dateTag}</span>
+          </div>
           <h2
             className="font-serif-romantic text-5xl md:text-7xl font-bold text-gradient-romantic tracking-tight mb-4 text-glow-rose"
           >

@@ -54,7 +54,7 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-rose-400/40 bg-rose-500/10 text-rose-300 text-sm tracking-widest uppercase"
         >
           <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-          <span>A Surprise for Tuhi</span>
+          <span>A Surprise for Tuhi • 13th September</span>
           <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
         </motion.div>
 
