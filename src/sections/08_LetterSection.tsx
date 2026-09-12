@@ -26,10 +26,10 @@ export const LetterSection: React.FC = () => {
             {LETTER_DATA.lines.map((line, idx) => (
               <motion.p
                 key={idx}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: idx * 0.2 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
               >
                 {line}
               </motion.p>
@@ -40,7 +40,7 @@ export const LetterSection: React.FC = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1, delay: 1.6 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
             className="pt-8 border-t border-rose-500/20 text-right space-y-1"
           >
             <p className="font-serif-romantic text-slate-400 italic text-base">

@@ -18,10 +18,10 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
   };
 
   const textVariants: Variants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    hidden: { opacity: 0, y: 15 },
     visible: (i: number) => ({
-      opacity: 1, y: 0, scale: 1,
-      transition: { delay: i * 1.1 + 0.5, duration: 1, ease: 'easeOut' }
+      opacity: 1, y: 0,
+      transition: { delay: i * 0.08, duration: 0.4, ease: 'easeOut' }
     })
   };
 
@@ -32,13 +32,12 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
       style={{ background: 'radial-gradient(ellipse at center, #1a0520 0%, #0d0510 40%, #070709 100%)' }}
       onClick={() => { if (!isPlaying) initAudio(); }}
     >
-      {/* Multi-layer ambient glows */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-rose-600/20 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-700/20 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-[150px] pointer-events-none" />
+      {/* Simplified ambient glows — no heavy blur on mobile */}
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-rose-600/20 rounded-full blur-[60px] pointer-events-none" />
+      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-700/20 rounded-full blur-[60px] pointer-events-none" />
 
-      {/* Decorative stars */}
-      {['top-20 left-16', 'top-32 right-20', 'bottom-28 left-12', 'bottom-16 right-24', 'top-1/2 left-8', 'top-1/2 right-8'].map((pos, i) => (
+      {/* Decorative stars — reduced count */}
+      {['top-20 left-16', 'top-32 right-20', 'bottom-28 left-12', 'bottom-16 right-24'].map((pos, i) => (
         <div
           key={i}
           className={`absolute ${pos} text-yellow-300 text-xl animate-twinkle pointer-events-none select-none`}
@@ -48,11 +47,11 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
         </div>
       ))}
 
-      <div className="max-w-2xl mx-auto z-10 space-y-8 relative">
+      <div className="max-w-2xl mx-auto z-10 space-y-6 relative">
         {/* Badge */}
         <motion.div
           custom={0} initial="hidden" animate="visible" variants={textVariants}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-rose-400/40 bg-rose-500/10 text-rose-300 text-sm tracking-widest uppercase backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-rose-400/40 bg-rose-500/10 text-rose-300 text-sm tracking-widest uppercase"
         >
           <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
           <span>A Surprise for Tuhi</span>
@@ -91,7 +90,7 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
         {/* CTA Button */}
         <motion.div
           custom={5} initial="hidden" animate="visible" variants={textVariants}
-          className="pt-4"
+          className="pt-2"
         >
           <motion.button
             whileHover={{ scale: 1.08, boxShadow: '0 0 50px rgba(244,63,94,0.7), 0 0 80px rgba(168,85,247,0.4)' }}
@@ -116,17 +115,12 @@ export const OpeningSection: React.FC<OpeningSectionProps> = ({ onEnter }) => {
         </motion.p>
       </div>
 
-      {/* Bottom emoji row */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 8, duration: 1.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-4 text-2xl select-none"
-      >
+      {/* Bottom emoji row — instant */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-4 text-2xl select-none">
         {'🎂🎉🎈🎀✨'.split('').map((e, i) => (
           <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}>{e}</span>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 };

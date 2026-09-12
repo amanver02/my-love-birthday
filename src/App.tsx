@@ -1,46 +1,32 @@
 import React, { Suspense, lazy } from 'react';
 import { AudioProvider } from './context/AudioContext';
-import { ParticleBackground, ConfettiRain, FloatingBalloons } from './components/common/ParticleBackground';
 import { AudioPlayer } from './components/common/AudioPlayer';
-import { NavigationProgress } from './components/common/NavigationProgress';
 
-// Critical above-the-fold section — loaded eagerly
+// Detect mobile once at module level
+const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+// ALL sections eagerly imported — no lazy loading delay on mobile
 import { OpeningSection } from './sections/01_OpeningSection';
+import { LukkaChuppiSection } from './sections/02_LukkaChuppiSection';
+import { WelcomeSection } from './sections/03_WelcomeSection';
+import { PhotoStorySection } from './sections/04_PhotoStorySection';
+import { ThingsILoveSection } from './sections/05_ThingsILoveSection';
+import { FunnyInvestigationSection } from './sections/06_FunnyInvestigationSection';
+import { SecretButtonSection } from './sections/07_SecretButtonSection';
+import { LetterSection } from './sections/08_LetterSection';
+import { MemoryCapsuleSection } from './sections/09_MemoryCapsuleSection';
+import { UsMomentSection } from './sections/10_UsMomentSection';
+import { WishSection } from './sections/11_WishSection';
+import { CinematicEndingSection } from './sections/12_CinematicEndingSection';
 
-// All below-the-fold sections — lazy loaded for mobile speed
-const LukkaChuppiSection      = lazy(() => import('./sections/02_LukkaChuppiSection').then(m => ({ default: m.LukkaChuppiSection })));
-const WelcomeSection          = lazy(() => import('./sections/03_WelcomeSection').then(m => ({ default: m.WelcomeSection })));
-const PhotoStorySection       = lazy(() => import('./sections/04_PhotoStorySection').then(m => ({ default: m.PhotoStorySection })));
-const ThingsILoveSection      = lazy(() => import('./sections/05_ThingsILoveSection').then(m => ({ default: m.ThingsILoveSection })));
-const FunnyInvestigationSection = lazy(() => import('./sections/06_FunnyInvestigationSection').then(m => ({ default: m.FunnyInvestigationSection })));
-const SecretButtonSection     = lazy(() => import('./sections/07_SecretButtonSection').then(m => ({ default: m.SecretButtonSection })));
-const LetterSection           = lazy(() => import('./sections/08_LetterSection').then(m => ({ default: m.LetterSection })));
-const MemoryCapsuleSection    = lazy(() => import('./sections/09_MemoryCapsuleSection').then(m => ({ default: m.MemoryCapsuleSection })));
-const UsMomentSection         = lazy(() => import('./sections/10_UsMomentSection').then(m => ({ default: m.UsMomentSection })));
-const WishSection             = lazy(() => import('./sections/11_WishSection').then(m => ({ default: m.WishSection })));
-const CinematicEndingSection  = lazy(() => import('./sections/12_CinematicEndingSection').then(m => ({ default: m.CinematicEndingSection })));
-
-// Custom cursor only on desktop (pointer: fine devices)
+// Heavy decorations — only on desktop
+const ParticleBackground = lazy(() => import('./components/common/ParticleBackground').then(m => ({ default: m.ParticleBackground })));
+const ConfettiRain = lazy(() => import('./components/common/ParticleBackground').then(m => ({ default: m.ConfettiRain })));
+const FloatingBalloons = lazy(() => import('./components/common/ParticleBackground').then(m => ({ default: m.FloatingBalloons })));
+const NavigationProgress = lazy(() => import('./components/common/NavigationProgress').then(m => ({ default: m.NavigationProgress })));
 const CustomCursor = lazy(() => import('./components/common/CustomCursor').then(m => ({ default: m.CustomCursor })));
 
-// Simple skeleton shown while a section loads
-const SectionSkeleton: React.FC = () => (
-  <div className="min-h-screen w-full flex items-center justify-center">
-    <div className="flex gap-2">
-      {[0,1,2].map(i => (
-        <div
-          key={i}
-          className="w-3 h-3 rounded-full bg-rose-500/40 animate-bounce"
-          style={{ animationDelay: `${i * 0.15}s` }}
-        />
-      ))}
-    </div>
-  </div>
-);
-
 export const App: React.FC = () => {
-  const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-
   const handleScrollToContent = () => {
     const el = document.getElementById('lukka-chuppi');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -49,81 +35,51 @@ export const App: React.FC = () => {
   return (
     <AudioProvider>
       <div className="relative min-h-screen bg-[#070709] text-slate-100 overflow-x-hidden">
-        {/* Global ambient and celebration layers */}
-        <ParticleBackground />
-        <ConfettiRain />
-        <FloatingBalloons />
-
-        {/* Custom cursor only on desktop */}
+        {/* Decorations: skip entirely on mobile for instant load */}
         {!isMobile && (
           <Suspense fallback={null}>
+            <ParticleBackground />
+            <ConfettiRain />
+            <FloatingBalloons />
             <CustomCursor />
+            <NavigationProgress />
+          </Suspense>
+        )}
+
+        {/* Mobile-only: lightweight confetti with fewer pieces */}
+        {isMobile && (
+          <Suspense fallback={null}>
+            <ConfettiRain />
           </Suspense>
         )}
 
         <AudioPlayer />
-        <NavigationProgress />
 
-        {/* Sections */}
+        {/* ALL sections rendered eagerly — zero loading delay */}
         <main className="relative z-10">
-          {/* Opening: eager loaded */}
           <OpeningSection onEnter={handleScrollToContent} />
           <div className="section-divider" />
-
-          {/* All remaining sections lazy loaded */}
-          <Suspense fallback={<SectionSkeleton />}>
-            <LukkaChuppiSection />
-          </Suspense>
+          <LukkaChuppiSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <WelcomeSection />
-          </Suspense>
+          <WelcomeSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <PhotoStorySection />
-          </Suspense>
+          <PhotoStorySection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <ThingsILoveSection />
-          </Suspense>
+          <ThingsILoveSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <FunnyInvestigationSection />
-          </Suspense>
+          <FunnyInvestigationSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <SecretButtonSection />
-          </Suspense>
+          <SecretButtonSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <LetterSection />
-          </Suspense>
+          <LetterSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <MemoryCapsuleSection />
-          </Suspense>
+          <MemoryCapsuleSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <UsMomentSection />
-          </Suspense>
+          <UsMomentSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <WishSection />
-          </Suspense>
+          <WishSection />
           <div className="section-divider" />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <CinematicEndingSection />
-          </Suspense>
+          <CinematicEndingSection />
         </main>
       </div>
     </AudioProvider>
