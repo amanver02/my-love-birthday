@@ -9,8 +9,11 @@ interface ImageWithFallbackProps {
   containerClassName?: string;
   caption?: string;
   aspectRatio?: 'square' | 'video' | 'portrait' | 'auto';
+  priority?: boolean;
   onClick?: () => void;
 }
+
+const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
 export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
@@ -19,6 +22,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   containerClassName = '',
   caption,
   aspectRatio = 'auto',
+  priority = false,
   onClick
 }) => {
   const [hasError, setHasError] = useState(false);
@@ -33,8 +37,8 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={isMobile ? {} : { y: -4, scale: 1.01 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
       onClick={onClick}
       className={`relative group rounded-2xl overflow-hidden border border-white/15 bg-slate-900/60 shadow-2xl shadow-rose-950/20 backdrop-blur-md ${aspectClasses[aspectRatio]} ${containerClassName}`}
     >
@@ -50,6 +54,8 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         <img
           src={src}
           alt={alt}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
           onLoad={() => setIsLoading(false)}
           onError={() => {
             setIsLoading(false);
@@ -80,8 +86,8 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
       {/* Caption Overlay */}
       {caption && (
-        <div className="absolute bottom-0 inset-x-0 p-4 md:p-5 z-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          <p className="font-serif-romantic text-base md:text-lg text-rose-50 font-medium italic drop-shadow-md">
+        <div className="absolute bottom-0 inset-x-0 p-3 md:p-5 z-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          <p className="font-serif-romantic text-sm md:text-lg text-rose-50 font-medium italic drop-shadow-md">
             "{caption}"
           </p>
         </div>
@@ -89,3 +95,4 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     </motion.div>
   );
 };
+

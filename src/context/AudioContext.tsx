@@ -34,6 +34,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     a.loop = true;
     a.volume = vol;
     a.muted = muted;
+    a.preload = 'none'; // Don't download audio until play() is called — critical for mobile performance
     return a;
   }, []);
 

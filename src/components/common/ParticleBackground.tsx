@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 
-// Confetti pieces floating at top of page continuously
+// Detect mobile once
+const isMobile = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
+// Confetti pieces — fewer on mobile
 export const ConfettiRain: React.FC = () => {
   const colors = ['#f43f5e','#a855f7','#3b82f6','#10b981','#f59e0b','#ec4899','#06b6d4','#ffffff'];
   const shapes = ['▲','★','●','■','♦','♥','✦'];
-  const pieces = Array.from({ length: 28 }, (_, i) => ({
+  const count = isMobile ? 12 : 28;
+  const pieces = Array.from({ length: count }, (_, i) => ({
     id: i,
     color: colors[i % colors.length],
     shape: shapes[i % shapes.length],
-    left: `${(i * 3.6) + Math.random() * 3}%`,
-    duration: `${4 + Math.random() * 6}s`,
+    left: `${(i * (100 / count)) + Math.random() * 2}%`,
+    duration: `${5 + Math.random() * 6}s`,
     delay: `${-Math.random() * 8}s`,
-    size: `${10 + Math.floor(Math.random() * 12)}px`,
+    size: `${10 + Math.floor(Math.random() * 10)}px`,
   }));
 
   return (
@@ -26,6 +30,7 @@ export const ConfettiRain: React.FC = () => {
             fontSize: p.size,
             animationDuration: p.duration,
             animationDelay: p.delay,
+            willChange: 'transform',
           }}
         >
           {p.shape}
@@ -35,9 +40,12 @@ export const ConfettiRain: React.FC = () => {
   );
 };
 
-// Floating balloons in corners
+// Floating balloons — fewer & no animations on mobile to save paint
 export const FloatingBalloons: React.FC = () => {
-  const balloons = [
+  const balloons = isMobile ? [
+    { emoji: '🎈', pos: 'bottom-12 left-2', anim: 'animate-balloon', size: 'text-4xl', delay: '0s' },
+    { emoji: '🎊', pos: 'bottom-8 right-2', anim: 'animate-balloon-slow', size: 'text-3xl', delay: '-2s' },
+  ] : [
     { emoji: '🎈', pos: 'bottom-12 left-4', anim: 'animate-balloon', size: 'text-5xl', delay: '0s' },
     { emoji: '🎀', pos: 'bottom-24 left-12', anim: 'animate-balloon-slow', size: 'text-3xl', delay: '-1s' },
     { emoji: '🎊', pos: 'bottom-8 right-4', anim: 'animate-balloon-fast', size: 'text-4xl', delay: '-2s' },
@@ -52,7 +60,7 @@ export const FloatingBalloons: React.FC = () => {
         <div
           key={i}
           className={`absolute ${b.pos} ${b.anim} ${b.size} select-none opacity-60`}
-          style={{ animationDelay: b.delay }}
+          style={{ animationDelay: b.delay, willChange: 'transform' }}
         >
           {b.emoji}
         </div>
@@ -61,11 +69,14 @@ export const FloatingBalloons: React.FC = () => {
   );
 };
 
-// Canvas star particles
+// Canvas star particles — disabled on mobile (too GPU heavy)
 export const ParticleBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    // Skip canvas animation entirely on mobile to save battery and CPU
+    if (isMobile) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -76,23 +87,23 @@ export const ParticleBackground: React.FC = () => {
     let h = canvas.height = window.innerHeight;
 
     const palette = [
-      'rgba(244,63,94,',   // rose
-      'rgba(168,85,247,',  // purple
-      'rgba(245,158,11,',  // gold
-      'rgba(59,130,246,',  // blue
-      'rgba(16,185,129,',  // emerald
-      'rgba(255,255,255,', // white
+      'rgba(244,63,94,',
+      'rgba(168,85,247,',
+      'rgba(245,158,11,',
+      'rgba(59,130,246,',
+      'rgba(16,185,129,',
+      'rgba(255,255,255,',
     ];
 
-    const count = Math.min(Math.floor(w * h / 9000), 80);
+    const count = Math.min(Math.floor(w * h / 12000), 55);
     const particles = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
-      r: Math.random() * 2.5 + 0.5,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: -(Math.random() * 0.35 + 0.05),
+      r: Math.random() * 2.2 + 0.4,
+      vx: (Math.random() - 0.5) * 0.2,
+      vy: -(Math.random() * 0.3 + 0.05),
       op: Math.random() * 0.7 + 0.2,
-      ps: Math.random() * 0.018 + 0.004,
+      ps: Math.random() * 0.015 + 0.003,
       col: palette[Math.floor(Math.random() * palette.length)],
     }));
 
@@ -110,8 +121,8 @@ export const ParticleBackground: React.FC = () => {
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = `${p.col}${o})`; ctx.fill();
         if (p.r > 1.8) {
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
-          ctx.fillStyle = `${p.col}${o * 0.12})`; ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+          ctx.fillStyle = `${p.col}${o * 0.1})`; ctx.fill();
         }
       });
       animId = requestAnimationFrame(draw);
@@ -120,5 +131,6 @@ export const ParticleBackground: React.FC = () => {
     return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animId); };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-80" />;
+  if (isMobile) return null;
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-70" />;
 };
