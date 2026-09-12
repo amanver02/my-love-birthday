@@ -25,43 +25,50 @@ const TRACK_URLS = {
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolumeState] = useState(0.55);
+  const [volume, setVolumeState] = useState(0.6);
   const [currentTrack, setCurrentTrack] = useState<'apna_bana_le' | 'tenu_khabar_nahi'>('apna_bana_le');
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasInitializedRef = useRef(false);
 
-  const buildAudio = useCallback((track: 'apna_bana_le' | 'tenu_khabar_nahi', vol: number, muted: boolean) => {
-    const a = new Audio(TRACK_URLS[track]);
-    a.loop = true;
-    a.volume = vol;
-    a.muted = muted;
-    a.preload = 'none'; // Don't download audio until play() is called — critical for mobile performance
-    return a;
+  const stopCurrentAudio = useCallback(() => {
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      } catch (e) {
+        console.error("Error stopping audio:", e);
+      }
+      audioRef.current = null;
+    }
   }, []);
 
-  // Auto-play on user interaction or page load
-  const initAudio = useCallback(() => {
-    if (audioRef.current && !audioRef.current.paused) {
-      setIsPlaying(true);
-      return;
-    }
+  const playTrack = useCallback((track: 'apna_bana_le' | 'tenu_khabar_nahi') => {
+    // Stop any existing playing song completely and immediately!
+    stopCurrentAudio();
 
-    if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-        setCurrentTrack('apna_bana_le');
-      }).catch(() => {});
-      return;
-    }
+    const audio = new Audio(TRACK_URLS[track]);
+    audio.loop = true;
+    audio.volume = volume;
+    audio.muted = isMuted;
 
-    const audio = buildAudio('apna_bana_le', volume, isMuted);
     audioRef.current = audio;
+    setCurrentTrack(track);
+
     audio.play().then(() => {
       setIsPlaying(true);
-      setCurrentTrack('apna_bana_le');
+      hasInitializedRef.current = true;
     }).catch((err) => {
-      console.log('Autoplay deferred until user interaction:', err);
+      console.log('Audio play error:', err);
     });
-  }, [volume, isMuted, buildAudio]);
+  }, [volume, isMuted, stopCurrentAudio]);
+
+  const initAudio = useCallback(() => {
+    if (hasInitializedRef.current && audioRef.current && !audioRef.current.paused) {
+      return;
+    }
+    playTrack('apna_bana_le');
+  }, [playTrack]);
 
   // Global listener: play Apna Bana Le on page load or very first interaction anywhere on page
   useEffect(() => {
@@ -69,13 +76,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     initAudio();
 
     const handleFirstInteraction = () => {
-      initAudio();
+      if (!hasInitializedRef.current) {
+        initAudio();
+      }
     };
 
-    window.addEventListener('click', handleFirstInteraction);
-    window.addEventListener('touchstart', handleFirstInteraction);
-    window.addEventListener('pointerdown', handleFirstInteraction);
-    window.addEventListener('keydown', handleFirstInteraction);
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
 
     return () => {
       window.removeEventListener('click', handleFirstInteraction);
@@ -84,40 +93,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       window.removeEventListener('keydown', handleFirstInteraction);
     };
   }, [initAudio]);
-
-  const playTrack = useCallback((track: 'apna_bana_le' | 'tenu_khabar_nahi') => {
-    if (currentTrack === track && isPlaying && audioRef.current && !audioRef.current.paused) return;
-
-    // Fade out current
-    if (audioRef.current) {
-      const old = audioRef.current;
-      const fadeOut = setInterval(() => {
-        if (old.volume > 0.05) {
-          old.volume = Math.max(0, old.volume - 0.05);
-        } else {
-          clearInterval(fadeOut);
-          old.pause();
-        }
-      }, 60);
-    }
-
-    const audio = buildAudio(track, 0, isMuted);
-    audioRef.current = audio;
-    setCurrentTrack(track);
-
-    audio.play().then(() => {
-      setIsPlaying(true);
-      // Fade in
-      const fadeIn = setInterval(() => {
-        if (audio.volume < volume - 0.05) {
-          audio.volume = Math.min(volume, audio.volume + 0.05);
-        } else {
-          audio.volume = volume;
-          clearInterval(fadeIn);
-        }
-      }, 60);
-    }).catch(() => {});
-  }, [currentTrack, isPlaying, isMuted, volume, buildAudio]);
 
   const togglePlay = useCallback(() => {
     if (!audioRef.current) {
@@ -134,8 +109,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const toggleMute = useCallback(() => {
     if (!audioRef.current) return;
-    audioRef.current.muted = !isMuted;
-    setIsMuted(!isMuted);
+    const nextMuted = !isMuted;
+    audioRef.current.muted = nextMuted;
+    setIsMuted(nextMuted);
   }, [isMuted]);
 
   const setVolume = useCallback((v: number) => {
